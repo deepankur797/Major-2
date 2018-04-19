@@ -454,3 +454,44 @@ label_df = pd.DataFrame(index = train_new.index, columns = ['SalePrice'])
 label_df['SalePrice'] = np.log(train['SalePrice'])
 print("Training set size:", train_new.shape)
 print("Test set size:", test_new.shape)
+
+#end sem
+
+import xgboost as xgb
+regr = xgb.XGBRegressor(colsample_bytree=0.2,
+                       gamma=0.0,
+                       learning_rate=0.05,
+                       max_depth=6,
+                       min_child_weight=1.5,
+                       n_estimators=7200,
+                       reg_alpha=0.9,
+                       reg_lambda=0.6,
+                       subsample=0.2,
+                       seed=42,
+                       silent=1)
+
+regr.fit(train_new, label_df)
+from sklearn.metrics import mean_squared_error
+def rmse(y_test,y_pred):
+      return np.sqrt(mean_squared_error(y_test,y_pred))
+
+# run prediction on training set to get an idea of how well it does
+y_pred = regr.predict(train_new)
+y_test = label_df
+print("XGBoost score on training set: ", rmse(y_test, y_pred))
+#XGBoost score on training set: ', 0.037633322832013358)
+
+
+from sklearn.linear_model import Lasso
+
+#found this best alpha through cross-validation
+best_alpha = 0.00099
+
+regr = Lasso(alpha=best_alpha, max_iter=50000)
+regr.fit(train_new, label_df)
+
+# run prediction on the training set to get a rough idea of how well it does
+y_pred = regr.predict(train_new)
+y_test = label_df
+print("Lasso score on training set: ", rmse(y_test, y_pred))
+#<pre class="">('Lasso score on training set: ', 0.10175440647797629)</pre>
